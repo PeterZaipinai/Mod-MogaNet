@@ -528,6 +528,10 @@ class MogaNet(nn.Module):
             to load pretrained weights (old version). Defaults to None.
     """
     arch_zoo = {
+        **dict.fromkeys(['n', 'nano'],
+                        {'embed_dims': [16, 32, 64, 128],
+                         'depths': [3, 3, 10, 2],
+                         'ffn_ratios': [8, 8, 4, 4]}),
         **dict.fromkeys(['xt', 'x-tiny', 'xtiny'],
                         {'embed_dims': [32, 64, 96, 192],
                          'depths': [3, 3, 10, 2],
@@ -797,6 +801,7 @@ def _cfg(url='', **kwargs):
     }
 
 default_cfgs = {
+    'moganet_n': _cfg(crop_pct=0.9),
     'moganet_xt': _cfg(crop_pct=0.9),
     'moganet_t': _cfg(crop_pct=0.9),
     'moganet_s': _cfg(crop_pct=0.9),
@@ -815,6 +820,16 @@ model_urls = {
     "moganet_large_1k": "https://github.com/Westlake-AI/MogaNet/releases/download/moganet-in1k-weights/moganet_large_sz224_8xbs64_ep300.pth.tar",
     "moganet_xlarge_1k": "https://github.com/Westlake-AI/MogaNet/releases/download/moganet-in1k-weights/moganet_xlarge_sz224_8xbs64_ep300.pth.tar",
 }
+
+def moganet_nano(pretrained=False, **kwargs):
+    model = MogaNet(arch='nano', **kwargs)
+    model.default_cfg = default_cfgs['moganet_n']
+    if pretrained:
+        print("Not implemented yet")
+        # url = model_urls['moganet_xtiny_1k']
+        # checkpoint = torch.hub.load_state_dict_from_url(url=url, map_location="cpu", check_hash=True)
+        # model.load_state_dict(checkpoint["state_dict"])
+    return model
 
 @register_model
 def moganet_xtiny(pretrained=False, **kwargs):
