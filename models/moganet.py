@@ -821,6 +821,7 @@ model_urls = {
     "moganet_xlarge_1k": "https://github.com/Westlake-AI/MogaNet/releases/download/moganet-in1k-weights/moganet_xlarge_sz224_8xbs64_ep300.pth.tar",
 }
 
+@register_model
 def moganet_nano(pretrained=False, **kwargs):
     model = MogaNet(arch='nano', **kwargs)
     model.default_cfg = default_cfgs['moganet_n']
