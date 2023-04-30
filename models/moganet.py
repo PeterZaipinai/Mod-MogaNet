@@ -529,8 +529,8 @@ class MogaNet(nn.Module):
     """
     arch_zoo = {
         **dict.fromkeys(['n', 'nano'],
-                        {'embed_dims': [16, 32, 64, 128],
-                         'depths': [3, 3, 10, 2],
+                        {'embed_dims': [16, 32, 48, 96],
+                         'depths': [3, 3, 8, 2],
                          'ffn_ratios': [8, 8, 4, 4]}),
         **dict.fromkeys(['xt', 'x-tiny', 'xtiny'],
                         {'embed_dims': [32, 64, 96, 192],
