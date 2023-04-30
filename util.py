@@ -82,6 +82,8 @@ def get_results(model, data_set):
             _, predicted = outputs.max(1)
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
+    print("Test Acc: ", correct / total)
+    print("If you can see this, it means get_results is running correctly.")
     return correct / total
 
 '''ResNet in PyTorch.
