@@ -73,7 +73,6 @@ class np_dataset(Dataset):
             image = self.cached_data[idx]
             label = self.cached_targets[idx]
 
-        print("data length is:",len(self.cached_data))
         return image, label
 
     def set_use_cache(self, use_cache):
