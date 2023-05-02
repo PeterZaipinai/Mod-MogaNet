@@ -121,13 +121,13 @@ def get_dataset(data_path, transform, poison_method, taregt_label):
 
 
 def get_results(model, data_set):
-    data_loader = torch.utils.data.DataLoader(data_set, batch_size=128, num_workers=4, shuffle=True, drop_last=True)
+    data_loader = torch.utils.data.DataLoader(data_set, batch_size=128, num_workers=4, shuffle=False)
 
-    # load data of train
-    for data in tqdm(data_loader, position=0, desc='load get_result dataset'):
-        pass
-    data_loader.dataset.set_use_cache(True)
-    data_loader.num_workers = 4
+    # # load data of train
+    # for data in tqdm(data_loader, position=0, desc='load get_result dataset'):
+    #     pass
+    # data_loader.dataset.set_use_cache(True)
+    # data_loader.num_workers = 4
 
     model = model.eval()
     correct = 0
