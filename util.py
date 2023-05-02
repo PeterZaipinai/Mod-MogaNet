@@ -76,6 +76,8 @@ class np_dataset(Dataset):
 
     def set_use_cache(self, use_cache):
         if use_cache:
+            print(len(self.cached_data))
+            print(len(self.cached_targets))
             self.cached_data = torch.stack(tuple(self.cached_data))
             self.cached_targets = tuple(self.cached_targets)
         else:
