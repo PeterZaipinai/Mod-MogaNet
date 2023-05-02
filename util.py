@@ -2,7 +2,7 @@ from torch.utils.data import Dataset, Subset
 import numpy as np
 import random
 import torch
-import tqdm
+from tqdm import tqdm
 
 def set_seed(seed):
     random.seed(seed)
@@ -54,10 +54,8 @@ class np_dataset(Dataset):
 
     def set_use_cache(self, use_cache):
         if use_cache:
-            x_img = tuple(self.cached_data)
-            self.cached_data = torch.stack(x_img)
-            lab_img = tuple(self.cached_targets)
-            self.cached_targets = tuple(lab_img)
+            self.cached_data = torch.stack(tuple(self.cached_data))
+            self.cached_targets = tuple(self.cached_targets)
         else:
             self.cached_data = []
             self.cached_targets = []
