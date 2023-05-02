@@ -77,8 +77,7 @@ class np_dataset(Dataset):
         return image, label
 
     def set_use_cache(self, use_cache):
-        if use_cache:
-            print(len(self.cached_data))
+        if use_cache and len(self.cached_data) > 0:
             self.cached_data = torch.stack(tuple(self.cached_data))
             self.cached_targets = tuple(self.cached_targets)
         else:
