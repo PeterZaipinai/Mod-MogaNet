@@ -11,6 +11,11 @@ def set_seed(seed):
 
 class np_dataset(Dataset):
     def __init__(self, data_path, transform, poison_transform=None, split="test", use_cache=False):
+        # Cache the data
+        self.cached_data = []
+        self.cached_targets = []
+        self.use_cache = use_cache
+
         npy_file = np.load(data_path, allow_pickle=True)
         if split == "test":
             self.subset_idx = npy_file.item().get('test_idx')
@@ -19,40 +24,40 @@ class np_dataset(Dataset):
         self.data = npy_file.item().get('data')[self.subset_idx]
         self.targets = npy_file.item().get('targets')[self.subset_idx]
 
-        # Cache the data
-        self.cached_data = []
-        self.cached_targets = []
-        self.use_cache = use_cache
-
         self.transform = transform
         self.poison_transform = poison_transform
+
+        super(np_dataset, self).__init__()
 
     def __getitem__(self, idx):
         if not self.use_cache:
             image = self.data[idx]
             label = self.targets[idx]
+
+            if self.poison_transform is not None and self.poison_transform[0] is not None:
+                image = self.poison_transform[0](image)
+
+            if self.transform is not None:
+                image = self.transform(image)
+
+            if self.poison_transform is not None and self.poison_transform[1] is not None:
+                image = self.poison_transform[1](image)
+
             self.cached_data.append(image)
             self.cached_targets.append(label)
         else:
             image = self.cached_data[idx]
             label = self.cached_targets[idx]
 
-        if self.poison_transform is not None and self.poison_transform[0] is not None:
-            image = self.poison_transform[0](image)
-
-        if self.transform is not None:
-            image = self.transform(image)
-
-        if self.poison_transform is not None and self.poison_transform[1] is not None:
-            image = self.poison_transform[1](image)
-        
-        return (image, label)
+        return image, label
 
     def set_use_cache(self, use_cache):
         if use_cache:
             self.cached_data = torch.stack(self.cached_data)
+            self.cached_targets = torch.stack(self.cached_targets)
         else:
             self.cached_data = []
+            self.cached_targets = []
         self.use_cache = use_cache
 
     def __len__(self):
