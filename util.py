@@ -69,7 +69,6 @@ class np_dataset(Dataset):
 
             self.cached_data.append(image)
             self.cached_targets.append(label)
-            print("load data length:",len(self.cached_data))
         else:
             image = self.cached_data[idx]
             label = self.cached_targets[idx]
@@ -78,6 +77,7 @@ class np_dataset(Dataset):
 
     def set_use_cache(self, use_cache):
         if use_cache and len(self.cached_data) > 0:
+            print("Using cached data:", len(self.cached_data))
             self.cached_data = torch.stack(tuple(self.cached_data))
             self.cached_targets = tuple(self.cached_targets)
         else:
