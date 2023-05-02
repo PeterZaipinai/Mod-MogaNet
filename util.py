@@ -11,25 +11,25 @@ def set_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
 
-
-def make_data_loader(
-        dataset,
-        batch_size,
-        shuffle=True,
-        num_workers=0,
-):
-    '''
-
-    Create a BRACS data loader
-    '''
-    dataset = dataset
-    dataloader = torch.utils.data.DataLoader(
-        dataset,
-        batch_size=batch_size,
-        shuffle=shuffle,
-        num_workers=num_workers,
-    )
-    return dataloader
+#
+# def make_data_loader(
+#         dataset,
+#         batch_size,
+#         shuffle=True,
+#         num_workers=0,
+# ):
+#     '''
+#
+#     Create a BRACS data loader
+#     '''
+#     dataset = dataset
+#     dataloader = torch.utils.data.DataLoader(
+#         dataset,
+#         batch_size=batch_size,
+#         shuffle=shuffle,
+#         num_workers=num_workers,
+#     )
+#     return dataloader
 
 
 class np_dataset(Dataset):
@@ -126,7 +126,7 @@ def get_results(model, data_set):
     # load data of train
     for data in tqdm(data_loader, position=0, desc='load get_result dataset'):
         pass
-    data_loader.data_set.set_use_cache(True)
+    data_loader.dataset.set_use_cache(True)
     data_loader.num_workers = 4
 
     model = model.eval()
