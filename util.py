@@ -121,7 +121,7 @@ def get_dataset(data_path, transform, poison_method, taregt_label):
 
 
 def get_results(model, data_set):
-    data_loader = torch.utils.data.DataLoader(data_set, batch_size=128, num_workers=4, shuffle=False)
+    data_loader = torch.utils.data.DataLoader(data_set, batch_size=128, num_workers=4, shuffle=True, drop_last=True)
 
     # load data of train
     for data in tqdm(data_loader, position=0, desc='load get_result dataset'):
