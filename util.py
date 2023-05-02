@@ -2,6 +2,7 @@ from torch.utils.data import Dataset, Subset
 import numpy as np
 import random
 import torch
+import tqdm
 
 def set_seed(seed):
     random.seed(seed)
@@ -85,17 +86,24 @@ class poison_subset(Dataset):
         return len(self.subset)
 
 def get_dataset(data_path, transform, poison_method, taregt_label):
-    val_dataset = np_dataset(data_path, transform, split="val")
-    test_dataset = np_dataset(data_path, transform)
+    val_dataset = np_dataset(data_path, transform, split="val", use_cache=False)
+    test_dataset = np_dataset(data_path, transform, use_cache=False)
 
-    asr_dataset = np_dataset(data_path, transform,poison_transform = poison_method[0])
+    asr_dataset = np_dataset(data_path, transform,poison_transform = poison_method[0], use_cache=False)
     asr_subset = poison_subset(asr_dataset, taregt_label, change_label= poison_method[1])
-    pacc_dataset = np_dataset(data_path, transform,poison_transform = poison_method[0])
+    pacc_dataset = np_dataset(data_path, transform,poison_transform = poison_method[0], use_cache=False)
     pacc_subset = poison_subset(pacc_dataset, taregt_label)
     return val_dataset, test_dataset, asr_subset, pacc_subset
 
 def get_results(model, data_set):
     data_loader = torch.utils.data.DataLoader(data_set, batch_size=128, num_workers=4, shuffle=False)
+
+    # load data of train
+    for data in tqdm(data_set,position=0,desc='load get_result dataset'):
+        pass
+    data_set.dataset.set_use_cache(use_cache=True)
+    data_set.num_workers = 4
+
     model = model.eval()
     correct = 0
     total = 0
