@@ -39,6 +39,7 @@ class np_dataset(Dataset):
         self.cached_targets = []
         self.use_cache = use_cache
 
+        print("now dataset path is:",data_path)
         npy_file = np.load(data_path, allow_pickle=True)
         if split == "test":
             self.subset_idx = npy_file.item().get('test_idx')
@@ -68,6 +69,7 @@ class np_dataset(Dataset):
 
             self.cached_data.append(image)
             self.cached_targets.append(label)
+            print("load data length:",len(self.cached_data))
         else:
             image = self.cached_data[idx]
             label = self.cached_targets[idx]
@@ -77,7 +79,6 @@ class np_dataset(Dataset):
     def set_use_cache(self, use_cache):
         if use_cache:
             print(len(self.cached_data))
-            print(len(self.cached_targets))
             self.cached_data = torch.stack(tuple(self.cached_data))
             self.cached_targets = tuple(self.cached_targets)
         else:
