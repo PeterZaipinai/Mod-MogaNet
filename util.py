@@ -12,6 +12,26 @@ def set_seed(seed):
     torch.cuda.manual_seed(seed)
 
 
+def make_data_loader(
+        dataset,
+        batch_size,
+        shuffle=True,
+        num_workers=0,
+):
+    '''
+
+    Create a BRACS data loader
+    '''
+    dataset = dataset
+    dataloader = torch.utils.data.DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=shuffle,
+        num_workers=num_workers,
+    )
+    return dataloader
+
+
 class np_dataset(Dataset):
     def __init__(self, data_path, transform, poison_transform=None, split="test", use_cache=False):
         # Cache the data
