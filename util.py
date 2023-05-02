@@ -4,11 +4,13 @@ import random
 import torch
 from tqdm import tqdm
 
+
 def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
+
 
 class np_dataset(Dataset):
     def __init__(self, data_path, transform, poison_transform=None, split="test", use_cache=False):
@@ -64,12 +66,13 @@ class np_dataset(Dataset):
     def __len__(self):
         return len(self.targets)
 
+
 class poison_subset(Dataset):
     def __init__(self, dataset, target_label, change_label=None):
         self.dataset = dataset
         self.target_label = target_label
         self.change_label = change_label
-        sub_idx = np.where(np.array(self.dataset.targets)!=target_label)[0]
+        sub_idx = np.where(np.array(self.dataset.targets) != target_label)[0]
         self.subset = Subset(dataset, sub_idx)
         self.targets = np.array(self.dataset.targets)[sub_idx]
 
@@ -85,24 +88,26 @@ class poison_subset(Dataset):
     def __len__(self):
         return len(self.subset)
 
+
 def get_dataset(data_path, transform, poison_method, taregt_label):
     val_dataset = np_dataset(data_path, transform, split="val", use_cache=False)
     test_dataset = np_dataset(data_path, transform, use_cache=False)
 
-    asr_dataset = np_dataset(data_path, transform,poison_transform = poison_method[0], use_cache=False)
-    asr_subset = poison_subset(asr_dataset, taregt_label, change_label= poison_method[1])
-    pacc_dataset = np_dataset(data_path, transform,poison_transform = poison_method[0], use_cache=False)
+    asr_dataset = np_dataset(data_path, transform, poison_transform=poison_method[0], use_cache=False)
+    asr_subset = poison_subset(asr_dataset, taregt_label, change_label=poison_method[1])
+    pacc_dataset = np_dataset(data_path, transform, poison_transform=poison_method[0], use_cache=False)
     pacc_subset = poison_subset(pacc_dataset, taregt_label)
     return val_dataset, test_dataset, asr_subset, pacc_subset
+
 
 def get_results(model, data_set):
     data_loader = torch.utils.data.DataLoader(data_set, batch_size=128, num_workers=4, shuffle=False)
 
     # load data of train
-    for data in tqdm(data_set,position=0,desc='load get_result dataset'):
+    for data in tqdm(data_loader, position=0, desc='load get_result dataset'):
         pass
-    data_set.dataset.set_use_cache(use_cache=True)
-    data_set.num_workers = 4
+    data_loader.data_set.set_use_cache(True)
+    data_loader.num_workers = 4
 
     model = model.eval()
     correct = 0
@@ -115,6 +120,7 @@ def get_results(model, data_set):
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
     return correct / total
+
 
 '''ResNet in PyTorch.
 
@@ -142,11 +148,11 @@ class BasicBlock(nn.Module):
         self.bn2 = nn.BatchNorm2d(planes)
 
         self.shortcut = nn.Sequential()
-        if stride != 1 or in_planes != self.expansion*planes:
+        if stride != 1 or in_planes != self.expansion * planes:
             self.shortcut = nn.Sequential(
-                nn.Conv2d(in_planes, self.expansion*planes,
+                nn.Conv2d(in_planes, self.expansion * planes,
                           kernel_size=1, stride=stride, bias=False),
-                nn.BatchNorm2d(self.expansion*planes)
+                nn.BatchNorm2d(self.expansion * planes)
             )
 
     def forward(self, x):
@@ -169,14 +175,14 @@ class Bottleneck(nn.Module):
         self.bn2 = nn.BatchNorm2d(planes)
         self.conv3 = nn.Conv2d(planes, self.expansion *
                                planes, kernel_size=1, bias=False)
-        self.bn3 = nn.BatchNorm2d(self.expansion*planes)
+        self.bn3 = nn.BatchNorm2d(self.expansion * planes)
 
         self.shortcut = nn.Sequential()
-        if stride != 1 or in_planes != self.expansion*planes:
+        if stride != 1 or in_planes != self.expansion * planes:
             self.shortcut = nn.Sequential(
-                nn.Conv2d(in_planes, self.expansion*planes,
+                nn.Conv2d(in_planes, self.expansion * planes,
                           kernel_size=1, stride=stride, bias=False),
-                nn.BatchNorm2d(self.expansion*planes)
+                nn.BatchNorm2d(self.expansion * planes)
             )
 
     def forward(self, x):
@@ -200,10 +206,10 @@ class ResNet(nn.Module):
         self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
         self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
         self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
-        self.linear = nn.Linear(512*block.expansion, num_classes)
+        self.linear = nn.Linear(512 * block.expansion, num_classes)
 
     def _make_layer(self, block, planes, num_blocks, stride):
-        strides = [stride] + [1]*(num_blocks-1)
+        strides = [stride] + [1] * (num_blocks - 1)
         layers = []
         for stride in strides:
             layers.append(block(self.in_planes, planes, stride))
@@ -222,8 +228,9 @@ class ResNet(nn.Module):
         return out
 
 
-def ResNet18(nc = 10):
+def ResNet18(nc=10):
     return ResNet(BasicBlock, [2, 2, 2, 2], num_classes=nc)
+
 
 '''GoogLeNet with PyTorch.'''
 import torch
@@ -277,11 +284,11 @@ class Inception(nn.Module):
         y2 = self.b2(x)
         y3 = self.b3(x)
         y4 = self.b4(x)
-        return torch.cat([y1,y2,y3,y4], 1)
+        return torch.cat([y1, y2, y3, y4], 1)
 
 
 class GoogLeNet(nn.Module):
-    def __init__(self, num_classes = 43):
+    def __init__(self, num_classes=43):
         super(GoogLeNet, self).__init__()
         self.pre_layers = nn.Sequential(
             nn.Conv2d(3, 192, kernel_size=3, padding=1),
@@ -289,15 +296,15 @@ class GoogLeNet(nn.Module):
             nn.ReLU(True),
         )
 
-        self.a3 = Inception(192,  64,  96, 128, 16, 32, 32)
+        self.a3 = Inception(192, 64, 96, 128, 16, 32, 32)
         self.b3 = Inception(256, 128, 128, 192, 32, 96, 64)
 
         self.maxpool = nn.MaxPool2d(3, stride=2, padding=1)
 
-        self.a4 = Inception(480, 192,  96, 208, 16,  48,  64)
-        self.b4 = Inception(512, 160, 112, 224, 24,  64,  64)
-        self.c4 = Inception(512, 128, 128, 256, 24,  64,  64)
-        self.d4 = Inception(512, 112, 144, 288, 32,  64,  64)
+        self.a4 = Inception(480, 192, 96, 208, 16, 48, 64)
+        self.b4 = Inception(512, 160, 112, 224, 24, 64, 64)
+        self.c4 = Inception(512, 128, 128, 256, 24, 64, 64)
+        self.d4 = Inception(512, 112, 144, 288, 32, 64, 64)
         self.e4 = Inception(528, 256, 160, 320, 32, 128, 128)
 
         self.a5 = Inception(832, 256, 160, 320, 32, 128, 128)
@@ -323,6 +330,7 @@ class GoogLeNet(nn.Module):
         out = out.view(out.size(0), -1)
         out = self.linear(out)
         return out
+
 
 import torch
 from itertools import repeat
@@ -354,7 +362,7 @@ class DifferentiableOptimizer:
 
     def get_opt_params(self, params):
         opt_params = [p for p in params]
-        opt_params.extend([torch.zeros_like(p) for p in params for _ in range(self.dim_mult-1) ])
+        opt_params.extend([torch.zeros_like(p) for p in params for _ in range(self.dim_mult - 1)])
         return opt_params
 
     def step(self, params, hparams, create_graph):
@@ -371,6 +379,7 @@ class DifferentiableOptimizer:
         else:
             self.curr_loss = self.loss_f(params, hparams)
         return self.curr_loss
+
 
 class GradientDescent(DifferentiableOptimizer):
     def __init__(self, loss_f, step_size, data_or_iter=None):
@@ -397,11 +406,13 @@ def grad_unused_zero(output, inputs, grad_outputs=None, retain_graph=False, crea
 
     return tuple(grad_or_zeros(g, v) for g, v in zip(grads, inputs))
 
+
 def get_outer_gradients(outer_loss, params, hparams, retain_graph=True):
     grad_outer_w = grad_unused_zero(outer_loss, params, retain_graph=retain_graph)
     grad_outer_hparams = grad_unused_zero(outer_loss, hparams, retain_graph=retain_graph)
 
     return grad_outer_w, grad_outer_hparams
+
 
 def update_tensor_grads(hparams, grads):
     for l, g in zip(hparams, grads):
@@ -413,7 +424,7 @@ def update_tensor_grads(hparams, grads):
 
 def fixed_point(params: List[Tensor],
                 hparams: List[Tensor],
-                K: int ,
+                K: int,
                 fp_map: Callable[[List[Tensor], List[Tensor]], List[Tensor]],
                 outer_loss: Callable[[List[Tensor], List[Tensor]], Tensor],
                 tol=1e-10,
@@ -467,6 +478,7 @@ def fixed_point(params: List[Tensor],
         update_tensor_grads(hparams, grads)
 
     return grads
+
 
 def cat_list_to_tensor(list_tx):
     return torch.cat([xx.reshape([-1]) for xx in list_tx])
